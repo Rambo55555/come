@@ -20,6 +20,7 @@ using a masked language modeling (MLM) loss.
 """
 
 import os
+os.environ['HUGGINGFACE_CO_RESOLVE_ENDPOINT'] = 'https://hf-mirror.com'
 import logging
 import argparse
 import math

@@ -44,8 +44,11 @@ def read_to_list(filename):
     f = open(filename, 'r',encoding="utf-8")
     res = []
     for row in f:
-        # (rid, text) = row.split('\t')
-        res.append(row.lower().split())
+        if '\t' in row:
+            (rid, text) = row.split('\t')
+        else:
+            text = row
+        res.append(text.lower().split())
     return res
 
 def metetor_rouge_cider(refs, preds):
