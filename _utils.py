@@ -1,6 +1,7 @@
 import json
 from scipy.stats import poisson
 import random
+import pickle
 
 def calcu_edit_distance(del_token, add_token):
     ''' What operation did del_token become add_token through '''
@@ -194,7 +195,15 @@ def convert_examples_to_features(item):
     source_str = source_str.replace('</s>', '<unk>')
     if args.data_type == 's1' or args.data_type == 's2':
         diff_out, tag = gen_edist(source_str.strip().split('<nl> '), tokenizer, args.max_source_length)
+
         assert len(diff_out) == len(tag)
+
+        diff_token_id = tokenizer.convert_tokens_to_ids('<diff>')
+        msg_token_id = tokenizer.convert_tokens_to_ids('<msg>')
+
+        diff_out = [diff_token_id] + diff_out + [msg_token_id] + tokenizer.encode(example.similar_message)[1:-1]
+        tag = [0] + tag +[0] + [4] * len(tokenizer.encode(example.similar_message)[1:-1])
+
         diff_out = [tokenizer.bos_token_id] + diff_out[:args.max_source_length - 2] + [tokenizer.eos_token_id]
         tag = [0] + tag[:args.max_source_length - 2] + [0]
         pad_len = args.max_source_length - len(diff_out)
@@ -344,6 +353,7 @@ class Example(object):
                  idx,
                  source,
                  target,
+                 similar_msg=None,
                  url=None,
                  task='',
                  sub_task=''
@@ -351,6 +361,7 @@ class Example(object):
         self.idx = idx
         self.source = source
         self.target = target
+        self.similar_msg = similar_msg
         self.url = url
         self.task = task
         self.sub_task = sub_task
@@ -462,6 +473,11 @@ def read_summarize_examples(filename, data_num):
             )
             if idx + 1 == data_num:
                 break
+    return examples
+
+def read_summarize_examples(retrieve_path: str):
+    with open(retrieve_path, 'rb') as file:
+        examples = pickle.load(file)
     return examples
 
 def read_jit_examples(filename, data_num):

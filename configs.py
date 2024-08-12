@@ -66,6 +66,7 @@ def add_args(parser):
                         help="Whether to run eval on the dev set.")
     parser.add_argument("--do_retrieval", action='store_true')
     parser.add_argument("--retrieval_file", default=None, type=str)
+    parser.add_argument("--split_tag", default=None, type=str)
     parser.add_argument("--do_jit", action='store_true')
     parser.add_argument("--do_lower_case", action='store_true',
                         help="Set this flag if you are using an uncased model.")

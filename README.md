@@ -1,5 +1,39 @@
 # COME: Commit Message Generation with Modification Embedding
 
+## 使用tfidf检索msg放到输入里面，tag为0
+*************s2
+BLEU: 18.89
+Meteor:  10.39
+Rouge-L:  23.95
+Cider:  0.76
+*************retrieve
+BLEU: 9.57
+Meteor:  5.37
+Rouge-L:  11.82
+Cider:  0.3
+*************svm
+BLEU: 18.97
+Meteor:  10.58
+Rouge-L:  24.08
+Cider:  0.79
+
+## 使用tfidf检索msg放到输入里面，tag为4
+*************s2
+BLEU: 19.23
+Meteor:  10.4
+Rouge-L:  24.08
+Cider:  0.77
+*************retrieve
+BLEU: 9.78
+Meteor:  5.45
+Rouge-L:  12.08
+Cider:  0.31
+*************svm
+BLEU: 19.23
+Meteor:  10.54
+Rouge-L:  24.14
+Cider:  0.79
+
 ## Environment
 ```
 conda env create -f environment.yml python=3.6

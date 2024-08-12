@@ -6,7 +6,7 @@ import torch.nn.functional as F
 class EdistT5Stack(T5Stack):
     def __init__(self, config, embed_tokens=None):
         super().__init__(config, embed_tokens)
-        self.tag_emb = nn.Embedding(4, config.d_model)
+        self.tag_emb = nn.Embedding(5, config.d_model)
         # self.tag_emb = tag_emb
 
     def parallelize(self, device_map=None):

@@ -39,7 +39,7 @@ def build_or_load_gen_model(args):
     # elif args.task == 'jit' and args.data_type == 's2':
     #     model.load_state_dict(torch.load(args.model_name_or_path))
     else:
-        model = model_class.from_pretrained(args.model_name_or_path)
+        model = model_class.from_pretrained(args.model_name_or_path, ignore_mismatched_sizes=True)
 
     logger.info("Finish loading model [%s] from %s", get_model_size(model), args.model_name_or_path)
     # print(model)
@@ -48,6 +48,8 @@ def build_or_load_gen_model(args):
         logger.info("Reload model from {}".format(args.load_model_path))
         model.load_state_dict(torch.load(args.load_model_path))
 
+    tokenizer.add_special_tokens({"additional_special_tokens": ["<diff>", "<msg>"]})
+    model.resize_token_embeddings(len(tokenizer))
     return config, model, tokenizer
 
 

@@ -306,7 +306,7 @@ def main():
                 if 'dev_loss' in dev_dataset:
                     eval_examples, eval_data = dev_dataset['dev_loss']
                 else:
-                    eval_examples, eval_data = load_and_cache_gen_data(args, args.dev_filename, pool, tokenizer, 'dev')
+                    eval_examples, eval_data = load_and_cache_gen_data(args, args.dev_filename, pool, tokenizer, 'valid')
                     dev_dataset['dev_loss'] = eval_examples, eval_data
 
                 eval_ppl = eval_ppl_epoch(args, eval_data, eval_examples, model, tokenizer)
@@ -355,7 +355,7 @@ def main():
                 logger.info("***** CUDA.empty_cache() *****")
                 torch.cuda.empty_cache()
                 if args.do_eval_bleu:
-                    eval_examples, eval_data = load_and_cache_gen_data(args, args.dev_filename, pool, tokenizer, 'dev',
+                    eval_examples, eval_data = load_and_cache_gen_data(args, args.dev_filename, pool, tokenizer, 'valid',
                                                                        only_src=True, is_sample=True)
 
                     result = eval_bleu_epoch(args, eval_data, eval_examples, model, tokenizer, 'dev', 'e%d' % cur_epoch)
@@ -413,9 +413,9 @@ def main():
             file = os.path.join(args.output_dir, 'checkpoint-{}/pytorch_model.bin'.format(criteria))
             logger.info("Reload model from {}".format(file))
             model.load_state_dict(torch.load(file))
-            eval_examples, eval_data = load_and_cache_gen_data(args, args.test_filename, pool, tokenizer, 'test',
+            eval_examples, eval_data = load_and_cache_gen_data(args, args.test_filename, pool, tokenizer, args.split_tag,
                                                                only_src=True, is_sample=False)
-            result = eval_bleu_epoch(args, eval_data, eval_examples, model, tokenizer, 'test', criteria)
+            result = eval_bleu_epoch(args, eval_data, eval_examples, model, tokenizer, args.split_tag, criteria)
             test_bleu, test_em = result['bleu'], result['em']
             test_codebleu = result['codebleu'] if 'codebleu' in result else 0
             result_str = "[%s] bleu-4: %.2f, em: %.4f, codebleu: %.4f\n" % (criteria, test_bleu, test_em, test_codebleu)
@@ -460,7 +460,7 @@ def main():
                 logger.info("load valid from cache")
                 eval_tensor = torch.load(os.path.join(args.output_dir, 'valid_tensor.pt'))
             else:
-                _, eval_data = load_and_cache_gen_data(args, args.dev_filename, pool, tokenizer, 'dev', only_src=True, is_sample=False)
+                _, eval_data = load_and_cache_gen_data(args, args.dev_filename, pool, tokenizer, 'valid', only_src=True, is_sample=False)
                 sampler = SequentialSampler(eval_data)
                 dataloader = DataLoader(eval_data, sampler=sampler, batch_size=args.eval_batch_size, num_workers=4, pin_memory=True)
                 for batch in tqdm(dataloader, total=len(dataloader)):
@@ -616,7 +616,7 @@ def main():
             if 'dev_loss' in dev_dataset:
                 eval_examples, eval_data = dev_dataset['dev_loss']
             else:
-                eval_examples, eval_data = load_and_cache_gen_data(args, args.dev_filename, pool, tokenizer, 'dev')
+                eval_examples, eval_data = load_and_cache_gen_data(args, args.dev_filename, pool, tokenizer, 'valid')
                 dev_dataset['dev_loss'] = eval_examples, eval_data
             
             eval_sampler = SequentialSampler(eval_data)

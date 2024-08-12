@@ -6,6 +6,10 @@ import random
 import torch
 import time
 from tqdm import tqdm
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+from rank_bm25 import BM25Okapi
+from typing import Any, Callable, Dict, List, Optional
 from _utils import *
 
 logger = logging.getLogger(__name__)
@@ -18,7 +22,11 @@ def load_and_cache_gen_data(args, filename, pool, tokenizer, split_tag, only_src
     data_tag = '_all' if args.data_num == -1 else '_%d' % args.data_num
     cache_fn = '{}/{}.pt'.format(args.cache_path, split_tag + ('_src' if only_src else '') + data_tag)
 
-    examples = read_examples(filename, args.data_num, args.task)
+    retrieve_method = 'tfidf'
+    retrieve_path = os.path.join(args.data_dir, args.task, args.sub_task, f'{split_tag}_{retrieve_method}.pkl')
+    examples = read_summarize_examples(retrieve_path)
+    examples = examples[:args.data_num]
+    #examples = read_examples(filename, args.data_num, args.task)
 
     if is_sample:
         examples = random.sample(examples, min(10000, len(examples)))
@@ -282,3 +290,49 @@ def get_elapse_time(t0):
     else:
         minute = int((elapse_time % 3600) // 60)
         return "{}m".format(minute)
+    
+def find_similar_message(query_examples, corpus_examples, k: int = 0):
+    query_diff_list = [ex.source for ex in query_examples]
+    query_message_list = [ex.target for ex in query_examples]
+    corpus_diff_list = [ex.source for ex in corpus_examples]
+    corpus_message_list = [ex.target for ex in corpus_examples]
+    retrieveModel = SparseRetrieveModel(corpus_diff_list)
+    similar_message_list, score_list = retrieveModel.retrieve_with_tfidf(query_diff_list, k)
+    for i, ex in enumerate(query_examples):
+        ex.similar_message = similar_message_list[i]
+        ex.similar_score = score_list[i]
+    return query_examples
+    
+class SparseRetrieveModel():
+
+    """
+    Args:
+        corpus: 
+
+    """
+    def __init__(self, corpus: List[str]):
+        self._corpus = corpus
+        self._tfidfModel = None
+        self._tfidfMatrix = None
+        self._bm25Model = None
+
+    """
+    Args:
+        query_list: 
+        k: the k-th most similar document to retrieve
+    """
+    def retrieve_with_tfidf(self, query_list: List[str], k: int = 0):
+        # Init the model
+        if self._tfidfModel is None:
+            self._tfidfModel = TfidfVectorizer()
+            self._tfidfMatrix = self._tfidfModel.fit_transform(self._corpus)
+        result_list = []
+        score_list = []
+        for query in tqdm(query_list, "Retrieving with TF-IDF"):
+            test_matrix = self._tfidfModel.transform([query])
+            similarity_matrix = cosine_similarity(test_matrix, self._tfidfMatrix)
+            sim_score = similarity_matrix[0]
+            index = sim_score.argsort()[::-1][k]
+            result_list.append(self._corpus[index])
+            score_list.append(sim_score[index])
+        return result_list, score_list
