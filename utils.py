@@ -291,15 +291,27 @@ def get_elapse_time(t0):
         minute = int((elapse_time % 3600) // 60)
         return "{}m".format(minute)
     
+# def find_similar_message(query_examples, corpus_examples, k: int = 0):
+#     query_diff_list = [ex.source for ex in query_examples]
+#     query_message_list = [ex.target for ex in query_examples]
+#     corpus_diff_list = [ex.source for ex in corpus_examples]
+#     corpus_message_list = [ex.target for ex in corpus_examples]
+#     retrieveModel = SparseRetrieveModel(corpus_message_list)
+#     similar_message_list, score_list = retrieveModel.retrieve_with_tfidf(query_message_list, k)
+#     for i, ex in enumerate(query_examples):
+#         ex.similar_message = similar_message_list[i]
+#         ex.similar_score = score_list[i]
+#     return query_examples
+
 def find_similar_message(query_examples, corpus_examples, k: int = 0):
     query_diff_list = [ex.source for ex in query_examples]
     query_message_list = [ex.target for ex in query_examples]
     corpus_diff_list = [ex.source for ex in corpus_examples]
     corpus_message_list = [ex.target for ex in corpus_examples]
     retrieveModel = SparseRetrieveModel(corpus_diff_list)
-    similar_message_list, score_list = retrieveModel.retrieve_with_tfidf(query_diff_list, k)
+    similar_index_list, score_list = retrieveModel.retrieve_with_tfidf(query_diff_list, k)
     for i, ex in enumerate(query_examples):
-        ex.similar_message = similar_message_list[i]
+        ex.similar_message = corpus_message_list[similar_index_list[i]]
         ex.similar_score = score_list[i]
     return query_examples
     
@@ -333,6 +345,6 @@ class SparseRetrieveModel():
             similarity_matrix = cosine_similarity(test_matrix, self._tfidfMatrix)
             sim_score = similarity_matrix[0]
             index = sim_score.argsort()[::-1][k]
-            result_list.append(self._corpus[index])
+            result_list.append(index)
             score_list.append(sim_score[index])
         return result_list, score_list

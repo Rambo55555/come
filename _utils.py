@@ -201,8 +201,10 @@ def convert_examples_to_features(item):
         diff_token_id = tokenizer.convert_tokens_to_ids('<diff>')
         msg_token_id = tokenizer.convert_tokens_to_ids('<msg>')
 
-        diff_out = [diff_token_id] + diff_out + [msg_token_id] + tokenizer.encode(example.similar_message)[1:-1]
-        tag = [0] + tag +[0] + [4] * len(tokenizer.encode(example.similar_message)[1:-1])
+        # diff_out = [diff_token_id] + diff_out + [msg_token_id] + tokenizer.encode(example.similar_message)[1:-1]
+        # tag = [0] + tag +[0] + [4] * len(tokenizer.encode(example.similar_message)[1:-1])
+
+        only_diff = tokenizer.encode(source_str.strip().split('<nl> '),  truncation=True, max_length=args.max_source_length)
 
         diff_out = [tokenizer.bos_token_id] + diff_out[:args.max_source_length - 2] + [tokenizer.eos_token_id]
         tag = [0] + tag[:args.max_source_length - 2] + [0]

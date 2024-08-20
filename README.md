@@ -18,6 +18,7 @@ Rouge-L:  24.08
 Cider:  0.79
 
 ## 使用tfidf检索msg放到输入里面，tag为4
+放的是diff
 *************s2
 BLEU: 19.23
 Meteor:  10.4
@@ -32,6 +33,22 @@ Cider:  0.31
 BLEU: 19.23
 Meteor:  10.54
 Rouge-L:  24.14
+Cider:  0.79
+
+batch=3
+BLEU: 18.96
+Meteor:  10.61
+Rouge-L:  24.03
+Cider:  0.78
+*************retrieve
+BLEU: 9.72
+Meteor:  5.51
+Rouge-L:  12.09
+Cider:  0.32
+*************svm
+BLEU: 19.05
+Meteor:  10.71
+Rouge-L:  24.12
 Cider:  0.79
 
 ## Environment
