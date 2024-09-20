@@ -74,7 +74,7 @@ def gen_edist(diff, tokenizer, max_len):
                 diff_token = diff[i].split()[1:]
                 diff_token = " ".join(diff_token)
                 diff_token += " <nl>"
-                output = tokenizer.encode(diff_token)
+                output = tokenizer.encode(diff_token, max_length=512, truncation=True)
                 del_list += output[1:-1]
                 i += 1
                 while i < len(diff) and len(diff[i]) == 0:
@@ -83,7 +83,7 @@ def gen_edist(diff, tokenizer, max_len):
                 diff_token = diff[i].split()[1:]
                 diff_token = " ".join(diff_token)
                 diff_token += " <nl>"
-                output = tokenizer.encode(diff_token)
+                output = tokenizer.encode(diff_token, max_length=512, truncation=True)
                 add_list += output[1:-1]
                 i += 1
                 while i < len(diff) and len(diff[i]) == 0:
@@ -101,14 +101,14 @@ def gen_edist(diff, tokenizer, max_len):
             diff_token = diff[i].split()[1:]
             diff_token = " ".join(diff_token)
             diff_token += " <nl>"
-            output = tokenizer.encode(diff_token)
+            output = tokenizer.encode(diff_token, max_length=512, truncation=True)
             diff_out += output[1:-1]
             tag += [2] * len(output[1:-1])
             i += 1
         else:
             # only origin
             diff_token = diff[i] + " <nl>"
-            output = tokenizer.encode(diff_token)
+            output = tokenizer.encode(diff_token, max_length=512, truncation=True)
             diff_out += output[1:-1]
             tag += [0] * len(output[1:-1])
             i += 1
@@ -462,9 +462,13 @@ def read_summarize_examples(filename, data_num):
             js = json.loads(line)
             if 'idx' not in js:
                 js['idx'] = idx
-            code = ' '.join(js['code_tokens']).replace('\n', ' ')
+            # code = ' '.join(js['code_tokens']).replace('\n', ' ')
+            # code = ' '.join(code.strip().split())
+            # nl = ' '.join(js['docstring_tokens']).replace('\n', '')
+            # nl = ' '.join(nl.strip().split())
+            code = js['original_string'].replace('\n', ' ')
             code = ' '.join(code.strip().split())
-            nl = ' '.join(js['docstring_tokens']).replace('\n', '')
+            nl = js['docstring'].replace('\n', '')
             nl = ' '.join(nl.strip().split())
             examples.append(
                 Example(
@@ -477,10 +481,10 @@ def read_summarize_examples(filename, data_num):
                 break
     return examples
 
-def read_summarize_examples(retrieve_path: str):
-    with open(retrieve_path, 'rb') as file:
-        examples = pickle.load(file)
-    return examples
+# def read_summarize_examples(retrieve_path: str):
+#     with open(retrieve_path, 'rb') as file:
+#         examples = pickle.load(file)
+#     return examples
 
 def read_jit_examples(filename, data_num):
     """Read examples from filename."""

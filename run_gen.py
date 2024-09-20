@@ -533,7 +533,9 @@ def main():
                         reference = [train_diff[idx].split()]
                         bleu4.append(sentence_bleu(reference, candidate))
                     idx = idxs[np.argmax(bleu4)]
-                    f1.write(train_msg[idx].strip() + '\n')
+                    #f1.write(train_msg[idx].strip() + '\n')
+                    json.dump({'message': train_msg[idx].strip()}, f1)
+                    f1.write('\n')  # 每个 JSON 对象独立成行
                     f2.write('{}\n'.format(max(bleu4)))
 
         if args.retrieval_file == "valid":
@@ -552,7 +554,9 @@ def main():
                         reference = [train_diff[idx].split()]
                         bleu4.append(sentence_bleu(reference, candidate))
                     idx = idxs[np.argmax(bleu4)]
-                    f1.write(train_msg[idx].strip() + '\n')
+                    #f1.write(train_msg[idx].strip() + '\n')
+                    json.dump({'message': train_msg[idx].strip()}, f1)
+                    f1.write('\n')  # 每个 JSON 对象独立成行
                     f2.write('{}\n'.format(max(bleu4)))
     
     if args.do_jit:

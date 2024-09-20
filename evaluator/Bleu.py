@@ -1,6 +1,7 @@
 import sys, math, re, xml.sax.saxutils
 import os
 import numpy as np
+import json
 nonorm = 0
 
 preserve_case = False

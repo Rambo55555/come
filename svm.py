@@ -7,6 +7,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 import os
 from evaluator.Bleu import cal_bleu
+import json
+import jsonlines
 
 def SVC_(kernel="rbf", gamma=1):
     return Pipeline([
@@ -40,7 +42,9 @@ if __name__ == "__main__":
     valid_retrieval_msg, valid_retrieval_bleu, valid_generate_msg, valid_generate_score, ground_truth = [], [], [], [], []
     with open(opt.valid_retrieval_msg, 'r') as f:
         for line in f.readlines():
-            valid_retrieval_msg.append(line)
+            #valid_retrieval_msg.append(line)
+            data = json.loads(line)
+            valid_retrieval_msg.append(data['message'])  # 只提取 'message' 字段
     with open(opt.valid_retrieval_bleu, 'r') as f:
         for line in f.readlines():
             valid_retrieval_bleu.append(line)
@@ -53,6 +57,7 @@ if __name__ == "__main__":
     with open(opt.ground_truth, 'r') as f:
         for line in f.readlines():
             ground_truth.append(line.split('\t')[1])
+    print(len(valid_retrieval_msg), len(valid_retrieval_bleu), len(valid_generate_msg), len(valid_generate_score), len(ground_truth))
     assert len(valid_retrieval_msg) == len(valid_retrieval_bleu) == len(valid_generate_msg) == len(valid_generate_score) == len(ground_truth)
 
     # find best threshold
@@ -108,7 +113,9 @@ if __name__ == "__main__":
     test_retrieval_msg, test_retrieval_bleu, test_generate_msg, test_generate_score = [], [], [], []
     with open(opt.test_retrieval_msg, 'r') as f:
         for line in f.readlines():
-            test_retrieval_msg.append(line)
+            #test_retrieval_msg.append(line)
+            data = json.loads(line)
+            test_retrieval_msg.append(data['message'])  # 只提取 'message' 字段
     with open(opt.test_retrieval_bleu, 'r') as f:
         for line in f.readlines():
             test_retrieval_bleu.append(line)
@@ -119,19 +126,28 @@ if __name__ == "__main__":
         for line in f.readlines():
             test_generate_score.append(line)
     assert len(test_retrieval_msg) == len(test_retrieval_bleu) == len(test_generate_msg) == len(test_generate_score)
+    print(len(test_retrieval_msg), len(test_retrieval_bleu), len(test_generate_msg), len(test_generate_score))
     with open(opt.output, 'w') as f:
         for i, j, k, l in zip(test_retrieval_msg, test_retrieval_bleu, test_generate_msg, test_generate_score):
             if float(j) < best[1]:
-                f.write(k)
+                #f.write(k)
+                json.dump({'message': k}, f)
+                f.write('\n')
                 continue
             elif float(l) < best[2]:
-                f.write(i)
+                #f.write(i)
+                json.dump({'message': i}, f)
+                f.write('\n')
                 continue
             res = best[3].predict(np.array([float(j), float(l)]).reshape(1, -1))
             if res > 0:
-                f.write(i)
+                #f.write(i)
+                json.dump({'message': i}, f)
+                f.write('\n')
             else:
-                f.write(k)
+                #f.write(k)
+                json.dump({'message': k}, f)
+                f.write('\n')
     print(best[1:3])
     bleu = cal_bleu(opt.output, opt.test_ground_truth)
     print(bleu)

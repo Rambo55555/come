@@ -24,9 +24,9 @@ def load_and_cache_gen_data(args, filename, pool, tokenizer, split_tag, only_src
 
     retrieve_method = 'tfidf'
     retrieve_path = os.path.join(args.data_dir, args.task, args.sub_task, f'{split_tag}_{retrieve_method}.pkl')
-    examples = read_summarize_examples(retrieve_path)
-    examples = examples[:args.data_num]
-    #examples = read_examples(filename, args.data_num, args.task)
+    # examples = read_summarize_examples(retrieve_path)
+    # examples = examples[:args.data_num]
+    examples = read_examples(filename, args.data_num, args.task)
 
     if is_sample:
         examples = random.sample(examples, min(10000, len(examples)))
